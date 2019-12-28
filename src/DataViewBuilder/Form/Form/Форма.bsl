@@ -1,0 +1,82 @@
+﻿
+
+
+#Region FormEventHandlers
+// Enter code here.
+#EndRegion
+
+#Region FormHeaderItemsEventHandlers
+// Enter code here.
+#EndRegion
+
+#Region FormTableItemsEventHandlers
+
+&AtClient
+Procedure ViewSQLCode(Command)
+	
+	CreateSQLCode(Items.MetaStructure.CurrentRow)
+	
+EndProcedure
+
+&AtClient
+Procedure MetaStructureOnActivateRow(Item)
+	
+	Var CurrentData;
+	
+	
+	CurrentData = Item.CurrentData;
+	If not CurrentData = Undefined Then
+		Items.MetaStructureContextMenuViewSQLCode.Visible = CurrentData.IsTable;
+	EndIf;
+	
+EndProcedure
+
+#EndRegion
+
+#Region FormCommandsEventHandlers
+
+&AtClient
+Procedure LoadDBStorageStructure(Command)
+	
+	LoadDBStorageStructureOnServer();
+	
+EndProcedure
+
+#EndRegion
+
+#Region Private
+
+
+///////////////
+// On Server
+
+&AtServer
+Function Object()
+	
+	Return FormAttributeToValue("Object");
+	
+EndFunction
+
+&AtServer
+Procedure ToForm(Data)
+	
+	ValueToFormAttribute(Data, "Object");
+	
+EndProcedure
+
+&AtServer
+Procedure LoadDBStorageStructureOnServer()
+	
+	ToForm(Object().LoadDBStorageStructure());
+	//GetDBStorageStructureInfo
+	
+EndProcedure
+
+&AtServer
+Function CreateSQLCode(Val CurrentRow)
+	
+	Return Object().CreateSQLCode(CurrentRow)
+	
+EndFunction
+
+#EndRegion
