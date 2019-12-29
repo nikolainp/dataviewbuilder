@@ -1,6 +1,4 @@
 ﻿
-
-
 #Region FormEventHandlers
 // Enter code here.
 #EndRegion
@@ -39,6 +37,39 @@ EndProcedure
 Procedure LoadDBStorageStructure(Command)
 	
 	LoadDBStorageStructureOnServer();
+	
+EndProcedure
+
+&AtClient
+Procedure Options(Command)
+	
+	Var Params, NotifyOfClose;
+	
+	
+	Params = New Structure;
+	Params.Insert("Source", Object);
+	
+	NotifyOfClose = New NotifyDescription("OptionsAtClose"
+		, ThisForm);
+	
+	OpenForm("ExternalDataProcessor.DataViewBuilder.Form.Options"
+		, Params
+		, ThisForm
+		, ThisForm.UniqueKey
+		, 
+		, 
+		, NotifyOfClose
+		, FormWindowOpeningMode.LockOwnerWindow);
+	
+EndProcedure
+&AtClient
+Procedure OptionsAtClose(Result, Params) Export
+	
+	If Result = Undefined Then
+		Return;
+	EndIf;
+	
+	FillPropertyValues(Object, Result);
 	
 EndProcedure
 
