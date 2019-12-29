@@ -12,7 +12,11 @@
 &AtClient
 Procedure ViewSQLCode(Command)
 	
-	CreateSQLCode(Items.MetaStructure.CurrentRow)
+	var sqlCode;
+	
+	
+	sqlCode = CreateSQLCode(Items.MetaStructure.CurrentRow);
+	ShowValue(,sqlCode);
 	
 EndProcedure
 
@@ -26,6 +30,20 @@ Procedure MetaStructureOnActivateRow(Item)
 	If not CurrentData = Undefined Then
 		Items.MetaStructureContextMenuViewSQLCode.Visible = CurrentData.IsTable;
 	EndIf;
+	
+EndProcedure
+
+&AtClient
+Procedure MetaStructureFlagOnChange(Item)
+	
+	Var parentTable, parentFlag;
+	Var curRow;
+	
+	
+	parentTable = Item.Parent;
+	curRow = parentTable.CurrentData;
+	parentFlag = curRow.Flag;
+	SetFlagOnTree(curRow, parentFlag);
 	
 EndProcedure
 
@@ -77,9 +95,24 @@ EndProcedure
 
 #Region Private
 
+///////////////
+// At Client
+
+&AtClient
+Procedure SetFlagOnTree(Val parentTree, Val parentFlag)
+	
+	Var curRow;
+	
+	
+	For Each curRow In parentTree.GetItems() Do
+		curRow.Flag = parentFlag;
+		SetFlagOnTree(curRow, parentFlag);
+	EndDo;
+	
+EndProcedure
 
 ///////////////
-// On Server
+// At Server
 
 &AtServer
 Function Object()
@@ -106,7 +139,13 @@ EndProcedure
 &AtServer
 Function CreateSQLCode(Val CurrentRow)
 	
-	Return Object().CreateSQLCode(CurrentRow)
+	Var CurItem;
+	
+	
+	CurItem = Object.MetaStructure.FindByID(CurrentRow);
+	
+	
+	Return Object().CreateSQLCode(CurItem);
 	
 EndFunction
 

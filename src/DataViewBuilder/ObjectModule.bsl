@@ -17,6 +17,12 @@ Function LoadDBStorageStructure() Export
 	
 EndFunction
 
+Function CreateSQLCode(Val Table) Export
+	
+	Return GetSQLCodeForTable(Table);
+	
+EndFunction
+
 #EndRegion
 
 #Region EventHandlers
@@ -28,6 +34,8 @@ EndFunction
 #EndRegion
 
 #Region Private
+
+#Region StorageStructure
 
 Procedure MakeLoadDBStorageStructure()
 	
@@ -219,5 +227,47 @@ Function AddTableRow(Val Rows, Val SubName)
 	Return SubRow;
 	
 EndFunction
+
+#EndRegion
+
+#Region CreateSQLCode
+
+Function GetSQLCodeForTable(Val curTable)
+	
+	Var tableColumns, curColumn;
+	Var viewColums, storageColumns;
+	Var template;
+	
+	
+	tableColumns = curTable.GetItems();
+	viewColums = New Array;
+	storageColumns = New Array;
+	For Each curColumn in tableColumns do
+		
+		viewColums.Add(curColumn.Name);
+		storageColumns.Add(curColumn.Storage);
+		
+	EndDo;
+	
+	template = "CREATE [ OR ALTER ] VIEW
+	| [dbo].[%1]
+	| (%2)
+	|AS 
+	|	SELECT
+	|		%3
+	|	FROM [dbo].[%4]";
+	
+	
+	Return StrTemplate(template
+		, curTable.Name
+		, StrConcat(viewColums, "
+		|	,")
+		, StrConcat(storageColumns, "
+		|		,")
+		, curTable.Storage);
+	
+EndFunction
+
+#EndRegion
 
 #EndRegion

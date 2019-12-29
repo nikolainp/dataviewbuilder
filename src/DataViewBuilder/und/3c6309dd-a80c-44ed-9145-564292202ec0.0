@@ -218,7 +218,7 @@
 },
 {0},1,0,2,0,2,
 {1,0},
-{1,0},0,0,0,3,0,3,2,3,0,
+{1,0},0,0,0,3,0,3,0,3,0,
 {4,0,
 {0},"",-1,-1,1,0,""},
 {4,0,
@@ -250,7 +250,7 @@
 {0}
 },
 {7,3,0,1,100},0,0,0,2},
-{0,1,0},1,
+{1,fe115cc8-9e33-4684-a166-bd5136fe7a9f,"MetaStructureFlagOnChange",1,0,fe115cc8-9e33-4684-a166-bd5136fe7a9f,0,1},1,
 {22,
 {17,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,8,"MetaStructureFlagContextMenu",
 {1,0},
@@ -1014,7 +1014,11 @@
 &AtClient
 Procedure ViewSQLCode(Command)
 	
-	CreateSQLCode(Items.MetaStructure.CurrentRow)
+	var sqlCode;
+	
+	
+	sqlCode = CreateSQLCode(Items.MetaStructure.CurrentRow);
+	ShowValue(,sqlCode);
 	
 EndProcedure
 
@@ -1028,6 +1032,20 @@ Procedure MetaStructureOnActivateRow(Item)
 	If not CurrentData = Undefined Then
 		Items.MetaStructureContextMenuViewSQLCode.Visible = CurrentData.IsTable;
 	EndIf;
+	
+EndProcedure
+
+&AtClient
+Procedure MetaStructureFlagOnChange(Item)
+	
+	Var parentTable, parentFlag;
+	Var curRow;
+	
+	
+	parentTable = Item.Parent;
+	curRow = parentTable.CurrentData;
+	parentFlag = curRow.Flag;
+	SetFlagOnTree(curRow, parentFlag);
 	
 EndProcedure
 
@@ -1079,9 +1097,24 @@ EndProcedure
 
 #Region Private
 
+///////////////
+// At Client
+
+&AtClient
+Procedure SetFlagOnTree(Val parentTree, Val parentFlag)
+	
+	Var curRow;
+	
+	
+	For Each curRow In parentTree.GetItems() Do
+		curRow.Flag = parentFlag;
+		SetFlagOnTree(curRow, parentFlag);
+	EndDo;
+	
+EndProcedure
 
 ///////////////
-// On Server
+// At Server
 
 &AtServer
 Function Object()
@@ -1108,7 +1141,13 @@ EndProcedure
 &AtServer
 Function CreateSQLCode(Val CurrentRow)
 	
-	Return Object().CreateSQLCode(CurrentRow)
+	Var CurItem;
+	
+	
+	CurItem = Object.MetaStructure.FindByID(CurrentRow);
+	
+	
+	Return Object().CreateSQLCode(CurItem);
 	
 EndFunction
 
