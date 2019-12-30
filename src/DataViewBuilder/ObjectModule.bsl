@@ -4,6 +4,8 @@
 Var TableID;
 Var FieldID;
 
+Var ADOConnection;
+
 #EndRegion
 
 #Region Public
@@ -251,7 +253,7 @@ Function GetSQLCodeForTable(Val curTable)
 	
 	template = "CREATE [ OR ALTER ] VIEW
 	| [dbo].[%1]
-	| (%2)
+	|	(%2)
 	|AS 
 	|	SELECT
 	|		%3
@@ -265,6 +267,196 @@ Function GetSQLCodeForTable(Val curTable)
 		, StrConcat(storageColumns, "
 		|		,")
 		, curTable.Storage);
+	
+EndFunction
+
+#EndRegion
+
+#Region SQLWork
+
+Procedure OpenDB()
+	
+	If not ADOConnection = Undefined Then
+		Return;
+	EndIf;
+	
+	ADOConnection = New COMObject("ADODB.Connection");
+	ADOConnection.ConnectionString = ThisObject.DestinationDB;
+	ADOConnection.ConnectionTimeOut = 1200;
+	ADOConnection.CursorLocation = 3;
+	
+	Try
+		
+		ADOConnection.Open();
+		
+	Except
+		
+		Message = New UserMessage;
+		Message.Text = NStr("en = 'Connection failed'; ru = 'Невозможно установить соединение'")
+			+ ErrorDescription();
+		Message.Field = "DestinationDB";
+		Message.DataPath = "Object";
+		Message.Message();
+		
+		ADOConnection = Undefined;
+		
+		Return;
+		
+	EndTry;
+	
+EndProcedure // OpenDB
+
+Procedure CloseDB()
+	
+	If ADOConnection = Undefined Then
+		Return;
+	EndIf;
+	
+	ADOConnection.Close();
+	ADOConnection = Undefined;
+	
+EndProcedure // CloseDB
+
+Procedure WriteData(Val QueryText, Val Data = Undefined)
+	
+	Var ADOCommand;
+	Var I;
+	
+	
+	OpenDB();
+	If ADOConnection = Undefined Then
+		Return;
+	EndIf;
+	
+	ADOCommand = New ComObject("ADODB.Command");
+	ADOCommand.ActiveConnection = ADOConnection;
+	ADOCommand.CommandType = 1;
+	ADOCommand.CommandText = QueryText;
+	
+	If TypeOf(Data) = Type("Array") Then
+		
+		For I = 0 To Data.UBound() Do
+			ADOCommand.Parameters(I).Value = Data.Get(I);
+		EndDo;
+		
+	EndIf;
+	
+	ADOCommand.Execute();
+	
+EndProcedure // WriteData
+
+Function ReadData(Val QueryText, Val Data = Undefined)
+	
+	Var ADOCommand;
+	Var ADOQuery;
+	Var I;
+	
+	
+	OpenDB();
+	If ADOConnection = Undefined Then
+		Return Undefined;
+	EndIf;
+	
+	ADOCommand = New COMОбъект("ADODB.Command");
+	ADOQuery = New ComObject("ADODB.RecordSet");
+	
+	ADOCommand.ActiveConnection = ADOConnection; 
+	ADOCommand.CommandType = 1;
+	ADOCommand.CommandText = QueryText;
+	ADOCommand.CommandTimeout = 1200;
+	ADOCommand.Prepared = True;
+	
+	If TypeOf(Data) = Type("Array") Then
+		
+		For I = 0 To Data.UBound() Do
+			ADOCommand.Parameters(I).Value = Data.Get(I);
+		EndDo;
+		
+	EndIf;
+	
+	ADOQuery = ADOCommand.Execute();
+	If ADOQuery.BOF = False
+		And ADOQuery.EOF = False Then
+		ADOQuery.MoveFirst();
+	EndIf;
+	
+	
+	Return ADOQuery;
+	
+EndFunction // ReadData
+
+//Функция		ПолучитьНомерНового (ТипЗначения)
+//	
+//	Перем	АДОКоманда;
+//	Перем	Номер;
+//	
+//	
+//	АДОКоманда = Новый ComObject("ADODB.Command");
+//	АДОКоманда.ActiveConnection = ADOConnection;
+//	АДОКоманда.CommandType = 4;
+//	АДОКоманда.CommandText = "sp_InsertNewDoc";
+//	
+//	// 133 = adDBDate, 200 = adVarChar, 2 = adInteger
+//	// 1 = adParamInput, 2 = adParamOutput
+//	АДОКоманда.Parameters.Append (АДОКоманда.CreateParameter ("@_Type",			200, 1, 150,	ТипЗначения	));
+//	АДОКоманда.Parameters.Append (АДОКоманда.CreateParameter ("@_Ref",			200, 1, 36,		""			));
+//	АДОКоманда.Parameters.Append (АДОКоманда.CreateParameter ("@LastNumber",	2,	 2						));
+//	АДОКоманда.Prepared			= 1;
+//	
+//	АДОКоманда.Execute();
+//	
+//	
+//	Номер	= АДОКоманда.Parameters.Item("@LastNumber").Value;
+//	
+//	
+//	Возврат		Номер;
+//	
+//КонецФункции
+
+Function DateToSQL(Val DateTime, Val IsTime = False)
+	
+	Var Year, Month, Day;
+	Var Hour, Minute, Second;
+	
+	
+	DateTime = ?(DateTime = Date(1,1,1), Date(1754,1,1), DateTime);
+	
+	Year = Year(DateTime);
+	Year = Year + 2000;
+	Year = XMLString(Year);
+	
+	Month = Month(DateTime);
+	Month = Format(Month, "ND=2; NLZ=");
+	
+	Day = Day(DateTime);
+	Day = Format(Day, "ND=2; NLZ=");
+	
+	If IsTime = True Then
+		
+		Hour = Format(Hour(DateTime), "ND=2; NZ=00; NLZ=");
+		Minute = Format(Minute(DateTime), "ND=2; NZ=00; NLZ=");
+		Second = Format(Second(DateTime), "ND=2; NZ=00; NLZ=");;
+		
+		Возврат StrTemplate("%1-%2-%3 %4:%5:%6", Year, Month, Day, Hour, Minute, Second);
+		
+	Else
+		
+		Return StrTemplate("%1-%2-%3", Year, Month, Day);
+		
+	EndIf;
+	
+EndFunction
+
+Function DateFromSQL(Val DateTime)
+	
+	If DateTime = NULL Then
+		Return Date(1, 1, 1);
+	EndIf;
+	
+	DateTime = Date(DateTime);
+	
+	
+	Return ?(DateTime = Date(1754,1,1), Date(1,1,1), DateTime);
 	
 EndFunction
 
