@@ -10,6 +10,39 @@ Var ADOConnection;
 
 #Region Public
 
+Procedure CheckDestinationDB() Export
+	
+	OpenDB();
+	
+EndProcedure
+
+Function GetListDB() Export
+	
+	Var Records, List;
+	
+	
+	Records = ReadData(
+		"SELECT
+		|	name
+		|FROM
+		|	sys.databases");
+	
+	List = New Array;
+	If Records = Undefined Then
+		Return List;
+	EndIf;
+	While Records.EOF() = 0 Do
+		
+		List.Add(Records.Fields(0).Value);
+		Records.MoveNext();
+		
+	EndDo;
+	
+	
+	Return List;
+	
+EndFunction
+
 Function LoadDBStorageStructure() Export
 	
 	MakeLoadDBStorageStructure();
@@ -21,7 +54,22 @@ EndFunction
 
 Function CreateSQLCode(Val Table) Export
 	
-	Return GetSQLCodeForTable(Table);
+	Return lStrConcat(GetSQLCodeForTable(Table)
+		, "
+		|GO
+		|
+		|");
+	
+EndFunction
+
+Function CreateDataView(Val Table) Export
+	
+	Var curQuery;
+	
+	
+	For Each curQuery in GetSQLCodeForTable(Table) Do
+		WriteData(curQuery);
+	EndDo;
 	
 EndFunction
 
@@ -32,7 +80,95 @@ EndFunction
 #EndRegion
 
 #Region Internal
-// Enter code here.
+
+#Region StringFunction
+
+Function lStrConcat(Val Strings, Val Separator) Export
+	
+	Var strBuffer, strIndex;
+	
+	
+	If Strings.Count() = 0 Then
+		Return "";
+	EndIf;
+	
+	strBuffer = Strings[0];
+	For strIndex = 1 To Strings.UBound() Do
+		strBuffer = strBuffer + Separator + Strings[strIndex];
+	EndDo;
+	
+	
+	Return strBuffer;
+	
+EndFunction
+
+Function lStrFind(Val String, Val SearchString) Export
+	
+	Return Find(String, SearchString);
+	
+EndFunction
+
+Function lStrTemplate(Val Template
+	, Val Val1 = ""
+	, Val Val2 = ""
+	, Val Val3 = ""
+	, Val Val4 = ""
+	, Val Val5 = ""
+	, Val Val6 = ""
+	, Val Val7 = ""
+	, Val Val8 = ""
+	, Val Val9 = "") Export
+	
+	Var I;
+	Var lTemplate;
+	
+	
+	lTemplate = Template;
+	lTemplate = StrReplace(lTemplate, "%1", Val1);
+	lTemplate = StrReplace(lTemplate, "%2", Val2);
+	lTemplate = StrReplace(lTemplate, "%3", Val3);
+	lTemplate = StrReplace(lTemplate, "%4", Val4);
+	lTemplate = StrReplace(lTemplate, "%5", Val5);
+	lTemplate = StrReplace(lTemplate, "%6", Val6);
+	lTemplate = StrReplace(lTemplate, "%7", Val7);
+	lTemplate = StrReplace(lTemplate, "%8", Val8);
+	lTemplate = StrReplace(lTemplate, "%9", Val9);
+	
+	
+	Return lTemplate;
+	
+EndFunction
+
+Function lStrStartsWith(Val String, Val SearchString) Export
+	
+	If StrLen(String) < StrLen(SearchString) Then
+		Return False;
+	EndIf;
+	
+	If Left(String, StrLen(SearchString)) = SearchString Then
+		Return True;
+	Else
+		Return False;
+	EndIf;
+	
+EndFunction
+
+Function lStrEndsWith(Val String, Val SearchString) Export
+	
+	If StrLen(String) < StrLen(SearchString) Then
+		Return False;
+	EndIf;
+	
+	If Right(String, StrLen(SearchString)) = SearchString Then
+		Return True;
+	Else
+		Return False;
+	EndIf;
+	
+EndFunction
+
+#EndRegion 
+
 #EndRegion
 
 #Region Private
@@ -144,7 +280,7 @@ Procedure LoadTableStorageStructure(Val CurTable)
 	For Each CurField In CurTable.Get(TableID.Fields) Do
 		
 		FieldRow = TableRow.Rows.Add();
-		FieldRow.Name = CurField.Get(FieldID.FieldName);
+		FieldRow.Name = GetColumnName(CurField.Get(FieldID.FieldName), CurField.Get(FieldID.StorageFieldName));
 		FieldRow.FullName = TableRow.FullName + "." + FieldRow.Name;
 		FieldRow.Storage = CurField.Get(FieldID.StorageFieldName);
 		FieldRow.IsField = True;
@@ -212,6 +348,45 @@ Function GetSubRowByTableName(Val Rows, Val Names, Val NameIndex = 1)
 	
 EndFunction
 
+Function GetColumnName(Name, Storage)
+	
+	Var curNamem, curSufName;
+	
+	
+	If IsBlankString(Name) Then
+		
+		If Storage = "_KeyField" Then
+			curName = NStr("en = 'UniqueKeyField'; ru = 'УникальнйИдентификаторСтроки'");
+			
+		ElsIf Storage = "_NumberPrefix" Then
+			curName = NStr("en = 'NumberPrefix'; ru = 'ПрефиксНомера'");
+			
+		EndIf;
+		
+	Else
+		curName = Name;
+		
+	EndIf;
+	
+	curSufName = "";
+	If lStrEndsWith(Storage, "_TYPE") Then
+		curSufName = NStr("en = '_Type'; ru = '_Тип'");
+		
+	ElsIf lStrEndsWith(Storage, "_RTRef") Then
+		curSufName = NStr("en = '_ReferenceType'; ru = '_ТипСсылки'");
+		
+	ElsIf lStrEndsWith(Storage, "_N") Then
+		curSufName = NStr("en = '_Numeric'; ru = '_Число'");
+		
+	ElsIf lStrEndsWith(Storage, "_RRRef") Then
+		
+	EndIf;
+	
+	
+	Return lStrTemplate("%1%2", curName, curSufName);
+	
+EndFunction
+
 Function AddTableRow(Val Rows, Val SubName)
 	
 	Var SubRow;
@@ -238,7 +413,7 @@ Function GetSQLCodeForTable(Val curTable)
 	
 	Var tableColumns, curColumn;
 	Var viewColums, storageColumns;
-	Var template;
+	Var queries;
 	
 	
 	tableColumns = curTable.GetItems();
@@ -251,22 +426,31 @@ Function GetSQLCodeForTable(Val curTable)
 		
 	EndDo;
 	
-	template = "CREATE [ OR ALTER ] VIEW
-	| [dbo].[%1]
-	|	(%2)
-	|AS 
-	|	SELECT
-	|		%3
-	|	FROM [dbo].[%4]";
+	queries = New Array;
+	queries.Add(
+		lStrTemplate(
+			"IF OBJECT_ID('[dbo].[%1]', 'V') IS NOT NULL
+			|	DROP VIEW [dbo].[%1]"
+			, curTable.Name));
+			
+	queries.Add(
+		lStrTemplate(
+			"CREATE VIEW [dbo].[%1]
+			|	(%2)
+			|AS
+			|	SELECT
+			|		%3
+			|	FROM [%4].[dbo].[%5]"
+			, curTable.Name
+			, lStrConcat(viewColums, "
+			|	, ")
+			, lStrConcat(storageColumns, "
+			|		, ")
+			, ThisObject.SourceDB
+			, curTable.Storage));
 	
 	
-	Return StrTemplate(template
-		, curTable.Name
-		, StrConcat(viewColums, "
-		|	,")
-		, StrConcat(storageColumns, "
-		|		,")
-		, curTable.Storage);
+	Return queries;
 	
 EndFunction
 
@@ -437,11 +621,11 @@ Function DateToSQL(Val DateTime, Val IsTime = False)
 		Minute = Format(Minute(DateTime), "ND=2; NZ=00; NLZ=");
 		Second = Format(Second(DateTime), "ND=2; NZ=00; NLZ=");;
 		
-		Возврат StrTemplate("%1-%2-%3 %4:%5:%6", Year, Month, Day, Hour, Minute, Second);
+		Return lStrTemplate("%1-%2-%3 %4:%5:%6", Year, Month, Day, Hour, Minute, Second);
 		
 	Else
 		
-		Return StrTemplate("%1-%2-%3", Year, Month, Day);
+		Return lStrTemplate("%1-%2-%3", Year, Month, Day);
 		
 	EndIf;
 	

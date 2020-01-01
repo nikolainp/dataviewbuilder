@@ -36,14 +36,14 @@ EndProcedure
 &AtClient
 Procedure MetaStructureFlagOnChange(Item)
 	
-	Var parentTable, parentFlag;
-	Var curRow;
+	Var parentTable, curRow;
 	
 	
 	parentTable = Item.Parent;
 	curRow = parentTable.CurrentData;
-	parentFlag = curRow.Flag;
-	SetFlagOnTree(curRow, parentFlag);
+	
+	SetFlagOnUpTree(curRow, curRow.Flag);
+	SetFlagOnSubTree(curRow, curRow.Flag);
 	
 EndProcedure
 
@@ -54,7 +54,16 @@ EndProcedure
 &AtClient
 Procedure LoadDBStorageStructure(Command)
 	
-	LoadDBStorageStructureOnServer();
+	LoadDBStorageStructureAtServer();
+	
+	Items.FormCreateAll.Enabled = True;
+	
+EndProcedure
+
+&AtClient
+Procedure CreateAll(Command)
+	
+	CreateAllAtServer();
 	
 EndProcedure
 
@@ -99,14 +108,34 @@ EndProcedure
 // At Client
 
 &AtClient
-Procedure SetFlagOnTree(Val parentTree, Val parentFlag)
+Procedure SetFlagOnUpTree(Val childRow, Val childFlag)
+	
+	Var parentRow;
+	
+	
+	If childFlag = False Then
+		Return;
+	EndIf;
+	
+	parentRow = childRow.GetParent();
+	If parentRow = Undefined Then
+		Return;
+	EndIf;
+	
+	parentRow.Flag = childFlag;
+	SetFlagOnUpTree(parentRow, childFlag);
+	
+EndProcedure
+
+&AtClient
+Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 	
 	Var curRow;
 	
 	
 	For Each curRow In parentTree.GetItems() Do
 		curRow.Flag = parentFlag;
-		SetFlagOnTree(curRow, parentFlag);
+		SetFlagOnSubTree(curRow, parentFlag);
 	EndDo;
 	
 EndProcedure
@@ -129,10 +158,43 @@ Procedure ToForm(Data)
 EndProcedure
 
 &AtServer
-Procedure LoadDBStorageStructureOnServer()
+Procedure LoadDBStorageStructureAtServer()
 	
 	ToForm(Object().LoadDBStorageStructure());
 	//GetDBStorageStructureInfo
+	
+EndProcedure
+
+&AtServer
+Procedure CreateAllAtServer()
+	
+	IterateOverTables(Object(), Object.MetaStructure.GetItems());
+	
+EndProcedure
+
+&AtServer
+Procedure IterateOverTables(Module, Val Tables)
+	
+	Var curTable;
+	
+	
+	For Each curTable In Tables Do
+		
+		If curTable.Flag = False Then
+			Continue;
+		EndIf;
+		
+		If curTable.isTable Then
+			
+			Module.CreateDataView(curTable)
+			
+		Else
+			
+			IterateOverTables(Module, curTable.GetItems());
+			
+		EndIf;
+		
+	EndDo;
 	
 EndProcedure
 

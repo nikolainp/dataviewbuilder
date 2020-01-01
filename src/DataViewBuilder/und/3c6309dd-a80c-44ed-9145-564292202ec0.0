@@ -12,7 +12,7 @@
 },
 {7,3,0,1,100},
 {0,0,0},1,
-{0,0,1},2,a9f3b1ac-f51b-431e-b102-55a69acdecad,
+{0,0,1},3,a9f3b1ac-f51b-431e-b102-55a69acdecad,
 {29,
 {1,02023637-7868-4a5f-8576-835a76e0c9ba},0,1,
 {0,
@@ -38,6 +38,52 @@
 {"Pattern"},"",2,0,1,
 {11,
 {2,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,0,"FormLoadConfigurationMetadataExtendedTooltip",
+{1,0},
+{1,0},1,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{5,0,0,3,0,
+{0,1,0},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,0,
+{0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
+},0,1,2,
+{1,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},
+{"U"},1,0,0,1,0,0,0,3,3,3,0,0,0,0,0},a9f3b1ac-f51b-431e-b102-55a69acdecad,
+{29,
+{40,02023637-7868-4a5f-8576-835a76e0c9ba},0,1,
+{0,
+{0,
+{"B",1},0}
+},0,"FormCreateAll",
+{1,0},0,
+{4,409b9a53-7f7e-4178-86c1-33176c7c7a7a},
+{0},3,0,0,0,2,2,0,0,0,
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},0,
+{4,0,
+{0},"",-1,-1,1,0,""},1,
+{"Pattern"},"",2,0,1,
+{11,
+{41,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,0,"FormCreateAllExtendedTooltip",
 {1,0},
 {1,0},1,0,0,2,2,
 {3,4,
@@ -1038,14 +1084,14 @@ EndProcedure
 &AtClient
 Procedure MetaStructureFlagOnChange(Item)
 	
-	Var parentTable, parentFlag;
-	Var curRow;
+	Var parentTable, curRow;
 	
 	
 	parentTable = Item.Parent;
 	curRow = parentTable.CurrentData;
-	parentFlag = curRow.Flag;
-	SetFlagOnTree(curRow, parentFlag);
+	
+	SetFlagOnUpTree(curRow, curRow.Flag);
+	SetFlagOnSubTree(curRow, curRow.Flag);
 	
 EndProcedure
 
@@ -1056,7 +1102,16 @@ EndProcedure
 &AtClient
 Procedure LoadDBStorageStructure(Command)
 	
-	LoadDBStorageStructureOnServer();
+	LoadDBStorageStructureAtServer();
+	
+	Items.FormCreateAll.Enabled = True;
+	
+EndProcedure
+
+&AtClient
+Procedure CreateAll(Command)
+	
+	CreateAllAtServer();
 	
 EndProcedure
 
@@ -1101,14 +1156,34 @@ EndProcedure
 // At Client
 
 &AtClient
-Procedure SetFlagOnTree(Val parentTree, Val parentFlag)
+Procedure SetFlagOnUpTree(Val childRow, Val childFlag)
+	
+	Var parentRow;
+	
+	
+	If childFlag = False Then
+		Return;
+	EndIf;
+	
+	parentRow = childRow.GetParent();
+	If parentRow = Undefined Then
+		Return;
+	EndIf;
+	
+	parentRow.Flag = childFlag;
+	SetFlagOnUpTree(parentRow, childFlag);
+	
+EndProcedure
+
+&AtClient
+Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 	
 	Var curRow;
 	
 	
 	For Each curRow In parentTree.GetItems() Do
 		curRow.Flag = parentFlag;
-		SetFlagOnTree(curRow, parentFlag);
+		SetFlagOnSubTree(curRow, parentFlag);
 	EndDo;
 	
 EndProcedure
@@ -1131,10 +1206,43 @@ Procedure ToForm(Data)
 EndProcedure
 
 &AtServer
-Procedure LoadDBStorageStructureOnServer()
+Procedure LoadDBStorageStructureAtServer()
 	
 	ToForm(Object().LoadDBStorageStructure());
 	//GetDBStorageStructureInfo
+	
+EndProcedure
+
+&AtServer
+Procedure CreateAllAtServer()
+	
+	IterateOverTables(Object(), Object.MetaStructure.GetItems());
+	
+EndProcedure
+
+&AtServer
+Procedure IterateOverTables(Module, Val Tables)
+	
+	Var curTable;
+	
+	
+	For Each curTable In Tables Do
+		
+		If curTable.Flag = False Then
+			Continue;
+		EndIf;
+		
+		If curTable.isTable Then
+			
+			Module.CreateDataView(curTable)
+			
+		Else
+			
+			IterateOverTables(Module, curTable.GetItems());
+			
+		EndIf;
+		
+	EndDo;
 	
 EndProcedure
 
@@ -1402,7 +1510,7 @@ CgkJCTwvYXBwZWFyYW5jZT4NCgkJPC9pdGVtPg0KCTwvY29uZGl0aW9uYWxBcHBl
 YXJhbmNlPg0KCTxvdXRwdXRQYXJhbWV0ZXJzLz4NCjwvU2V0dGluZ3M+}
 },
 {0,0},
-{0,3,
+{0,4,
 {9,
 {1,409b9a53-7f7e-4178-86c1-33176c7c7a7a},"LoadDBStorageStructure",
 {1,2,
@@ -1452,6 +1560,23 @@ YXJhbmNlPg0KCTxvdXRwdXRQYXJhbWV0ZXJzLz4NCjwvU2V0dGluZ3M+}
 {0,0,0},
 {4,1,
 {0,942e0303-a3ec-4fe8-887c-5aea8516d424},"",-1,-1,1,0,""},"Options",3,1,0,
+{0,0},1,0,1,0,0,2},
+{9,
+{4,409b9a53-7f7e-4178-86c1-33176c7c7a7a},"CreateAll",
+{1,2,
+{"en","Create DataView"},
+{"ru","Создать dataview"}
+},
+{1,1,
+{"en","Create all"}
+},
+{0,
+{0,
+{"B",1},0}
+},
+{0,0,0},
+{4,0,
+{0},"",-1,-1,1,0,""},"CreateAll",3,1,0,
 {0,0},1,0,1,0,0,2}
 },
 {0,0},

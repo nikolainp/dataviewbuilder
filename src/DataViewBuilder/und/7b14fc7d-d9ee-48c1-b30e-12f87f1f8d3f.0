@@ -107,7 +107,35 @@
 },0,1,2,
 {1,
 {1,0},0},0,0,1,0,0,1,0,3,3,0},
-{"U"},1,0,0,1,0,0,0,3,3,3,0,0,0,0,0},1,0,0,0,3,3,0},2,77ffcc29-7f2d-4223-b22f-19666e7250ba,
+{"U"},1,0,0,1,0,0,0,3,3,3,0,0,0,0,0},1,0,0,0,3,3,0},1,cd5394d0-7dda-4b56-8927-93ccbe967a01,
+{22,
+{11,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,1,
+{0,
+{0,
+{"B",1},0}
+},5,"GroupSQLDB",
+{1,1,
+{"en","Group SQLDB"}
+},
+{1,1,
+{"en","Group SQLDB"}
+},0,1,0,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{28,0,0,2,0,
+{0},
+{1,0},
+{"Pattern"},"",
+{3,4,
+{0}
+},0,0,0,1,
+{1,0},0,0,3,3,0,0,1,0,
+{3,4,
+{0}
+},0,2,0,0},2,77ffcc29-7f2d-4223-b22f-19666e7250ba,
 {34,
 {1,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,1,
 {0,
@@ -143,9 +171,9 @@
 {7,3,0,1,100},
 {0,0,0},1,
 {32,
-{3,0},0,0,2,2,1,2,2,2,2,2,2,2,2,2,
+{3,0},0,0,2,2,1,2,2,2,2,2,2,1,2,2,
 {"U"},
-{"U"},"",0,
+{"U"},"",1,
 {4,0,
 {0},"",-1,-1,1,0,""},0,0,2,3,00000000-0000-0000-0000-000000000000,
 {5004,0},
@@ -165,7 +193,7 @@
 },
 {7,3,0,1,100},1,
 {3,0,0},0,
-{1,0},2,0,2,0,1,0,0,1,0,0,0,0,0,0,0,0,0},
+{1,0},2,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0},
 {0,1,0},1,
 {22,
 {2,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,8,"SourceDBКонтекстноеМеню",
@@ -201,7 +229,35 @@
 {0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
 },0,1,2,
 {1,
-{1,0},0},0,0,1,0,0,1,0,3,3,0},3,3,0},77ffcc29-7f2d-4223-b22f-19666e7250ba,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},3,3,0},cd5394d0-7dda-4b56-8927-93ccbe967a01,
+{22,
+{13,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,1,
+{0,
+{0,
+{"B",1},0}
+},5,"GroupSQLDestinationDB",
+{1,1,
+{"en","Group SQLDestination DB"}
+},
+{1,1,
+{"en","Group SQLDestination DB"}
+},0,1,0,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{28,1,0,2,0,
+{0},
+{1,0},
+{"Pattern"},"",
+{3,4,
+{0}
+},0,0,0,1,
+{1,0},0,0,3,3,2,0,0,2,
+{3,4,
+{0}
+},0,2,0,2},2,77ffcc29-7f2d-4223-b22f-19666e7250ba,
 {34,
 {4,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,1,
 {0,
@@ -237,7 +293,7 @@
 {7,3,0,1,100},
 {0,0,0},1,
 {32,
-{3,0},0,0,2,2,1,2,2,2,2,2,2,2,2,2,
+{3,0},0,0,2,2,1,2,2,2,2,2,2,1,2,2,
 {"U"},
 {"U"},"",0,
 {4,0,
@@ -260,7 +316,7 @@
 {7,3,0,1,100},1,
 {3,0,0},0,
 {1,0},2,0,2,0,1,0,0,1,0,0,0,0,0,0,0,0,0},
-{0,1,0},1,
+{1,fe115cc8-9e33-4684-a166-bd5136fe7a9f,"DestinationDBOnChange",1,0,fe115cc8-9e33-4684-a166-bd5136fe7a9f,0,1},1,
 {22,
 {5,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,8,"DestinationDBКонтекстноеМеню",
 {1,0},
@@ -295,7 +351,100 @@
 {0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
 },0,1,2,
 {1,
-{1,0},0},0,0,1,0,0,1,0,3,3,0},3,3,0},"","",1,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},3,3,0},a9f3b1ac-f51b-431e-b102-55a69acdecad,
+{29,
+{15,02023637-7868-4a5f-8576-835a76e0c9ba},0,1,
+{0,
+{0,
+{"B",1},0}
+},1,"CheckDestinationDB",
+{1,2,
+{"en","Check"},
+{"ru","Проверить"}
+},1,
+{2,409b9a53-7f7e-4178-86c1-33176c7c7a7a},
+{0},3,0,0,0,2,2,0,0,0,
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},0,
+{4,0,
+{0},"",-1,-1,1,0,""},1,
+{"Pattern"},"",2,0,1,
+{11,
+{16,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,0,"CheckDestinationDBExtendedTooltip",
+{1,0},
+{1,0},1,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{5,0,0,3,0,
+{0,1,0},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,0,
+{0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
+},0,1,2,
+{1,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},
+{"U"},1,0,0,1,0,0,0,3,3,3,0,0,1,0,0},1,0,1,
+{11,
+{14,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,0,"GroupSQLDestinationDBExtendedTooltip",
+{1,0},
+{1,0},1,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{5,0,0,3,0,
+{0,1,0},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,0,
+{0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
+},0,1,2,
+{1,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},0,3,3,0},1,0,1,
+{11,
+{12,02023637-7868-4a5f-8576-835a76e0c9ba},0,0,0,0,"GroupSQLDBExtendedTooltip",
+{1,0},
+{1,0},1,0,0,2,2,
+{3,4,
+{0}
+},
+{7,3,0,1,100},
+{0,0,0},1,
+{5,0,0,3,0,
+{0,1,0},
+{3,4,
+{0}
+},
+{3,4,
+{0}
+},
+{3,0,
+{0},0,1,0,48312c09-257f-4b29-b280-284dd89efc1e}
+},0,1,2,
+{1,
+{1,0},0},0,0,1,0,0,1,0,3,3,0},0,3,3,0},"","",1,
 {22,
 {0},0,0,0,7,"Navigator",
 {1,0},
@@ -335,13 +484,19 @@
 Procedure OnCreateAtServer(Cancel, StandardProcessing)
 	
 	FillPropertyValues(Object, Parameters.Source);
+	SetupFormRequisites();
 	
 EndProcedure
 
 #EndRegion
 
 #Region FormHeaderItemsEventHandlers
-// Enter code here.
+
+&AtClient
+Procedure DestinationDBOnChange(Item)
+	SetupSourceDB();
+EndProcedure
+
 #EndRegion
 
 #Region FormTableItemsEventHandlers
@@ -356,9 +511,69 @@ Procedure SaveOptions(Command)
 	
 EndProcedure
 
+&AtClient
+Procedure CheckDestinationDB(Command)
+	CheckDestinationDBAtServer();
+EndProcedure
+
 #EndRegion
 
 #Region Private
+
+///////////////
+// At Server
+
+&AtServer
+Function Object()
+	
+	Return FormAttributeToValue(""Object"");
+	
+EndFunction
+
+&AtServer
+Procedure SetupFormRequisites()
+	
+	SetupSourceDB();
+	
+EndProcedure
+
+&AtServer
+Procedure SetupSourceDB()
+	
+	Var Module;
+	Var IBConnection, StrIndex;
+	
+	
+	Module = Object();
+	If IsBlankString(Object.SourceDB) Then
+		
+		IBConnection = InfoBaseConnectionString();
+		If Module.lStrStartsWith(IBConnection, ""Srvr="") Then
+			
+			StrIndex = Module.lStrFind(IBConnection, "";Ref="");
+			If StrIndex = 0 Then
+				Return;
+			EndIf;
+			
+			Object.SourceDB = Right(IBConnection, StrIndex + 5);
+			Object.SourceDB = StrReplace(Object.SourceDB, """""""", """");
+			Object.SourceDB = StrReplace(Object.SourceDB, "";"", """");
+			
+		EndIf;
+		
+	EndIf;
+	
+	Items.SourceDB.ChoiceList.LoadValues(Module.GetListDB());
+	
+EndProcedure
+
+&AtServer
+Procedure CheckDestinationDBAtServer()
+	
+	Object().CheckDestinationDB();
+	
+EndProcedure
+
 #EndRegion
 ",
 {4,1,
@@ -403,7 +618,7 @@ YXJhbWV0ZXJzLz4NCjwvU2V0dGluZ3M+}
 {0,"Source",
 {"Pattern"},1}
 },
-{0,1,
+{0,2,
 {9,
 {1,409b9a53-7f7e-4178-86c1-33176c7c7a7a},"SaveOptions",
 {1,2,
@@ -420,6 +635,22 @@ YXJhbWV0ZXJzLz4NCjwvU2V0dGluZ3M+}
 {0,0,0},
 {4,0,
 {0},"",-1,-1,1,0,""},"SaveOptions",3,1,0,
+{0,0},1,0,1,0,0,2},
+{9,
+{2,409b9a53-7f7e-4178-86c1-33176c7c7a7a},"CheckDestinationDB",
+{1,1,
+{"en","Check destination DB"}
+},
+{1,1,
+{"en","Check destination DB"}
+},
+{0,
+{0,
+{"B",1},0}
+},
+{0,0,0},
+{4,0,
+{0},"",-1,-1,1,0,""},"CheckDestinationDB",3,0,0,
 {0,0},1,0,1,0,0,2}
 },
 {0,0},
