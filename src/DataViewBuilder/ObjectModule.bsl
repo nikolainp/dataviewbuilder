@@ -411,10 +411,15 @@ EndFunction
 
 Function GetSQLCodeForTable(Val curTable)
 	
-	Var tableColumns, curColumn;
+	Var tableName, tableColumns, curColumn;
 	Var viewColums, storageColumns;
 	Var queries;
 	
+	
+	tableName = StrReplace(curTable.FullName, ".", "_");
+	If ThisObject.DataView_AddDBName Then
+		tableName = lStrTemplate("%1_%2", ThisObject.SourceDB, tableName);
+	EndIf;
 	
 	tableColumns = curTable.GetItems();
 	viewColums = New Array;
@@ -431,7 +436,7 @@ Function GetSQLCodeForTable(Val curTable)
 		lStrTemplate(
 			"IF OBJECT_ID('[dbo].[%1]', 'V') IS NOT NULL
 			|	DROP VIEW [dbo].[%1]"
-			, curTable.Name));
+			, tableName));
 			
 	queries.Add(
 		lStrTemplate(
@@ -441,7 +446,7 @@ Function GetSQLCodeForTable(Val curTable)
 			|	SELECT
 			|		%3
 			|	FROM [%4].[dbo].[%5]"
-			, curTable.Name
+			, tableName
 			, lStrConcat(viewColums, "
 			|	, ")
 			, lStrConcat(storageColumns, "
