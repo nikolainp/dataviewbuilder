@@ -189,8 +189,10 @@ Procedure MakeLoadDBStorageStructure()
 	For Each CurTable In StorageStructure Do
 		LoadTableStorageStructure(CurTable);
 	EndDo;
+	SortStorageStructure();
 	
 EndProcedure
+
 
 Procedure ClearAndCheckStorageStructure()
 	
@@ -203,6 +205,7 @@ Procedure ClearAndCheckStorageStructure()
 	ExpectedColumns = New Array;
 	ExpectedColumns.Add(New Structure("Name, Type", "Flag", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "FullName", New TypeDescription("String")));
+	ExpectedColumns.Add(New Structure("Name, Type", "IsObject", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsTable", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsField", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "Name", New TypeDescription("String")));
@@ -272,6 +275,7 @@ Procedure LoadTableStorageStructure(Val CurTable)
 	
 	TableRow = GetRowByTableName(GetTableName(CurTable));
 	If IsMainTable(CurTable) Then
+		TableRow.IsObject = True;
 		TableRow = AddTableRow(TableRow.Rows, CurTable.Get(TableID.Purpose));
 	Endif;
 	
@@ -288,6 +292,13 @@ Procedure LoadTableStorageStructure(Val CurTable)
 	EndDo;
 	
 EndProcedure
+
+Procedure SortStorageStructure()
+	
+	SortLevelStorageStructure(ThisObject.MetaStructure.Rows);
+	
+EndProcedure
+
 
 Function GetTableName(Val CurTable)
 	
@@ -361,6 +372,9 @@ Function GetColumnName(Name, Storage)
 		ElsIf Storage = "_NumberPrefix" Then
 			curName = NStr("en = 'NumberPrefix'; ru = 'ПрефиксНомера'");
 			
+		ElsIf Storage = "_SimpleKey" Then
+			curName = NStr("en = 'SimpleKey'; ru = 'КороткийКлючЗаписи'");
+			
 		EndIf;
 		
 	Else
@@ -375,8 +389,20 @@ Function GetColumnName(Name, Storage)
 	ElsIf lStrEndsWith(Storage, "_RTRef") Then
 		curSufName = NStr("en = '_ReferenceType'; ru = '_ТипСсылки'");
 		
+	ElsIf lStrEndsWith(Storage, "_L") Then
+		curSufName = NStr("en = '_Boolean'; ru = '_Булево'");
+		
 	ElsIf lStrEndsWith(Storage, "_N") Then
 		curSufName = NStr("en = '_Numeric'; ru = '_Число'");
+		
+	ElsIf lStrEndsWith(Storage, "_T") Then
+		curSufName = NStr("en = '_DateTime'; ru = '_ДатаВремя'");
+		
+	ElsIf lStrEndsWith(Storage, "_S") Then
+		curSufName = NStr("en = '_String'; ru = '_Строка'");
+		
+	ElsIf lStrEndsWith(Storage, "_B") Then
+		curSufName = NStr("en = '_Binary'; ru = '_ДвоичныеДанные'");
 		
 	ElsIf lStrEndsWith(Storage, "_RRRef") Then
 		
@@ -404,6 +430,26 @@ Function AddTableRow(Val Rows, Val SubName)
 	Return SubRow;
 	
 EndFunction
+
+
+Procedure SortLevelStorageStructure(Rows)
+	
+	Var CurRow;
+	
+	
+	If Rows.Count() = 0 Then
+		Return;
+	EndIf;
+	
+	If Rows[0].IsObject Then
+		Rows.Sort("Name", False);
+	EndIf;
+	
+	For Each CurRow In Rows Do
+		SortLevelStorageStructure(CurRow.Rows);
+	EndDo;
+	
+EndProcedure
 
 #EndRegion
 
