@@ -134,6 +134,12 @@ Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 	
 	
 	For Each curRow In parentTree.GetItems() Do
+		
+		If Object.DataView_SkipChanges
+			and curRow.IsChangesTable Then
+			Continue;
+		EndIf;
+		
 		curRow.Flag = parentFlag;
 		SetFlagOnSubTree(curRow, parentFlag);
 	EndDo;

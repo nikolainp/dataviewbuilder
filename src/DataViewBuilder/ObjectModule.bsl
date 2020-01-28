@@ -207,6 +207,7 @@ Procedure ClearAndCheckStorageStructure()
 	ExpectedColumns.Add(New Structure("Name, Type", "FullName", New TypeDescription("String")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsObject", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsTable", New TypeDescription("Boolean")));
+	ExpectedColumns.Add(New Structure("Name, Type", "IsChangesTable", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsField", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "Name", New TypeDescription("String")));
 	ExpectedColumns.Add(New Structure("Name, Type", "Storage", New TypeDescription("String")));
@@ -277,6 +278,8 @@ Procedure LoadTableStorageStructure(Val CurTable)
 	If IsMainTable(CurTable) Then
 		TableRow.IsObject = True;
 		TableRow = AddTableRow(TableRow.Rows, CurTable.Get(TableID.Purpose));
+	ElsIf IsChangesTable(CurTable) Then
+		TableRow.IsChangesTable = True;
 	Endif;
 	
 	TableRow.IsTable = True;
@@ -324,6 +327,18 @@ Function IsMainTable(Val CurTable)
 	
 	
 	Return Purpose = "Main" Or Purpose = "Основная";
+	
+EndFunction
+
+Function IsChangesTable(Val CurTable)
+	
+	Var Purpose;
+	
+	
+	Purpose = CurTable.Get(TableID.Purpose);
+	
+	
+	Return Purpose = "ChangeRecords" Or Purpose = "Изменения";
 	
 EndFunction
 
@@ -386,7 +401,8 @@ Function GetColumnName(Name, Storage)
 	If lStrEndsWith(Storage, "_TYPE") Then
 		curSufName = NStr("en = '_Type'; ru = '_Тип'");
 		
-	ElsIf lStrEndsWith(Storage, "_RTRef") Then
+	ElsIf lStrEndsWith(Storage, "_RTRef")
+		or lStrEndsWith(Storage, "TRef") Then
 		curSufName = NStr("en = '_ReferenceType'; ru = '_ТипСсылки'");
 		
 	ElsIf lStrEndsWith(Storage, "_L") Then
