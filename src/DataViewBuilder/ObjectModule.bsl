@@ -338,7 +338,7 @@ Function IsChangesTable(Val CurTable)
 	Purpose = CurTable.Get(TableID.Purpose);
 	
 	
-	Return Purpose = "ChangeRecords" Or Purpose = "Изменения";
+	Return Purpose = "ChangeRecords" Or Purpose = "РегистрацияИзменений";
 	
 EndFunction
 
@@ -507,17 +507,24 @@ Function GetSQLCodeForTable(Val curTable)
 			|AS
 			|	SELECT
 			|		%3
-			|	FROM [%4].[dbo].[%5]"
+			|	FROM [%4].[dbo].[%5] %6"
 			, tableName
 			, lStrConcat(viewColums, "
 			|	, ")
 			, lStrConcat(storageColumns, "
 			|		, ")
 			, ThisObject.SourceDB
-			, curTable.Storage));
+			, curTable.Storage
+			, WithNoLock()));
 	
 	
 	Return queries;
+	
+EndFunction
+
+Function WithNoLock()
+	
+	Return ?(ThisObject.DataView_AddWithNOLOCK, "WITH (NOLOCK)", "");
 	
 EndFunction
 

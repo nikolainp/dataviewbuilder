@@ -76,7 +76,7 @@ Procedure SetupSourceDB()
 				Return;
 			EndIf;
 			
-			Object.SourceDB = Right(IBConnection, StrIndex + 5);
+			Object.SourceDB = Right(IBConnection, StrLen(IBConnection) - StrIndex - 5);
 			Object.SourceDB = StrReplace(Object.SourceDB, """", "");
 			Object.SourceDB = StrReplace(Object.SourceDB, ";", "");
 			

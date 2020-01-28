@@ -142,6 +142,7 @@ Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 		
 		curRow.Flag = parentFlag;
 		SetFlagOnSubTree(curRow, parentFlag);
+		
 	EndDo;
 	
 EndProcedure
