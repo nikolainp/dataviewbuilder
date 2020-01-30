@@ -68,8 +68,16 @@ Function CreateDataView(Val Table) Export
 	
 	
 	For Each curQuery in GetSQLCodeForTable(Table) Do
+		
 		WriteData(curQuery);
+		
 	EndDo;
+	
+EndFunction
+
+Function DataViewName(Val Table) Export
+	
+	Return GetSQLNameForTable(Table);
 	
 EndFunction
 
@@ -203,7 +211,7 @@ Procedure ClearAndCheckStorageStructure()
 	ThisObject.MetaStructure.Rows.Clear();
 	
 	ExpectedColumns = New Array;
-	ExpectedColumns.Add(New Structure("Name, Type", "Flag", New TypeDescription("Boolean")));
+	ExpectedColumns.Add(New Structure("Name, Type", "Flag", TypeNumeric(1, 0, False)));
 	ExpectedColumns.Add(New Structure("Name, Type", "FullName", New TypeDescription("String")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsObject", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsTable", New TypeDescription("Boolean")));
@@ -217,7 +225,7 @@ Procedure ClearAndCheckStorageStructure()
 		
 		CurColumn = Columns.Find(CurExpColumn.Name);
 		If CurColumn = Undefined Then
-			Columns.Add("Flag", CurExpColumn.Type);
+			Columns.Add(CurExpColumn.Name, CurExpColumn.Type);
 		EndIf;
 		
 	EndDo
@@ -478,14 +486,11 @@ Function GetSQLCodeForTable(Val curTable)
 	Var queries;
 	
 	
-	tableName = StrReplace(curTable.FullName, ".", "_");
-	If ThisObject.DataView_AddDBName Then
-		tableName = lStrTemplate("%1_%2", ThisObject.SourceDB, tableName);
-	EndIf;
-	
+	tableName = GetSQLNameForTable(curTable);
 	tableColumns = curTable.GetItems();
 	viewColums = New Array;
 	storageColumns = New Array;
+	
 	For Each curColumn in tableColumns do
 		
 		viewColums.Add(curColumn.Name);
@@ -519,6 +524,21 @@ Function GetSQLCodeForTable(Val curTable)
 	
 	
 	Return queries;
+	
+EndFunction
+
+Function GetSQLNameForTable(Val curTable)
+	
+	Var tableName;
+	
+	
+	tableName = StrReplace(curTable.FullName, ".", "_");
+	If ThisObject.DataView_AddDBName Then
+		tableName = lStrTemplate("%1_%2", ThisObject.SourceDB, tableName);
+	EndIf;
+	
+	
+	Return tableName;
 	
 EndFunction
 
@@ -715,6 +735,24 @@ Function DateFromSQL(Val DateTime)
 	
 	
 	Return ?(DateTime = Date(1754,1,1), Date(1,1,1), DateTime);
+	
+EndFunction
+
+#EndRegion
+
+#Region Service
+
+Function TypeNumeric(numberOfDigits = 10, numberDecimalPoint = 2, sign = True)
+	
+	Var qualifier, typeDesc;
+	
+	
+	sign = ?(sign = True, AllowedSign.Any, AllowedSign.Nonnegative);
+	qualifier = New NumberQualifiers(numberOfDigits, numberDecimalPoint, sign);
+	typeDesc = New TypeDescription("Number", qualifier);
+	
+	
+	Return typeDesc;
 	
 EndFunction
 

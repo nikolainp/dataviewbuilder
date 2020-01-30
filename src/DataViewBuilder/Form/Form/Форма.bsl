@@ -71,7 +71,17 @@ EndProcedure
 &AtClient
 Procedure CreateAll(Command)
 	
+	ClearMessages();
 	CreateAllAtServer();
+	
+	ShowQueryBox(New NotifyDescription("CreateAllContunie", ThisForm)
+		, NStr("en = 'Creation completed'; ru = 'Создание завершено'")
+		, QuestionDialogMode.OK
+		, 10);
+	
+EndProcedure
+&AtClient
+Procedure CreateAllContunie(Result, AdditionalParameters) Export
 	
 EndProcedure
 
@@ -112,7 +122,7 @@ EndProcedure
 
 #Region Private
 
-///////////////
+/////////////////////////////////////////////
 // At Client
 
 &AtClient
@@ -179,7 +189,7 @@ Function GetFlagOnLevel(Val level)
 	
 EndFunction
 
-///////////////
+/////////////////////////////////////////////
 // At Server
 
 &AtServer
@@ -225,7 +235,11 @@ Procedure IterateOverTables(Module, Val Tables)
 		
 		If curTable.isTable Then
 			
-			Module.CreateDataView(curTable)
+			Module.CreateDataView(curTable);
+			
+			Message(Module.lStrTemplate(
+				NStr("en = 'Created: %1'; ru = 'Создано: %1'")
+				, Module.DataViewName(curTable)));
 			
 		Else
 			
