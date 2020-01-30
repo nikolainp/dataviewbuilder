@@ -42,6 +42,14 @@ Procedure MetaStructureFlagOnChange(Item)
 	parentTable = Item.Parent;
 	curRow = parentTable.CurrentData;
 	
+	If curRow = Undefined Then
+		Return;
+	EndIf;
+	
+	If curRow.Flag = 2 Then
+		curRow.Flag = 0;
+	EndIf;
+	
 	SetFlagOnUpTree(curRow, curRow.Flag);
 	SetFlagOnSubTree(curRow, curRow.Flag);
 	
@@ -112,17 +120,13 @@ Procedure SetFlagOnUpTree(Val childRow, Val childFlag)
 	
 	Var parentRow;
 	
-	
-	If childFlag = False Then
-		Return;
-	EndIf;
-	
+	// 0 - False, 1 - True
 	parentRow = childRow.GetParent();
 	If parentRow = Undefined Then
 		Return;
 	EndIf;
 	
-	parentRow.Flag = childFlag;
+	parentRow.Flag = GetFlagOnLevel(parentRow);
 	SetFlagOnUpTree(parentRow, childFlag);
 	
 EndProcedure
@@ -146,6 +150,34 @@ Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 	EndDo;
 	
 EndProcedure
+
+&AtClient
+Function GetFlagOnLevel(Val level)
+	
+	Var curRow, flagOnLevel;
+	
+	
+	For Each curRow In level.GetItems() Do
+		
+		If Object.DataView_SkipChanges
+			and curRow.IsChangesTable Then
+			Continue;
+		EndIf;
+		
+		If flagOnLevel = Undefined Then
+			flagOnLevel = curRow.Flag;
+		EndIf;
+		
+		If Not flagOnLevel = curRow.Flag Then 
+			Return 2;
+		EndIf;
+		
+	EndDo;
+	
+	
+	Return flagOnLevel;
+	
+EndFunction
 
 ///////////////
 // At Server
