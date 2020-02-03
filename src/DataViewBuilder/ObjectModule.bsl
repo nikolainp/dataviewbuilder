@@ -4,6 +4,9 @@
 Var TableID;
 Var FieldID;
 
+Var TablePurposes;
+Var ColumnNames;
+
 Var ADOConnection;
 
 #EndRegion
@@ -228,7 +231,11 @@ Procedure ClearAndCheckStorageStructure()
 			Columns.Add(CurExpColumn.Name, CurExpColumn.Type);
 		EndIf;
 		
-	EndDo
+	EndDo;
+	
+	
+	SetupTablePurposes();
+	SetupColumnNames();
 	
 EndProcedure
 
@@ -326,30 +333,6 @@ Function GetTableName(Val CurTable)
 	
 EndFunction
 
-Function IsMainTable(Val CurTable)
-	
-	Var Purpose;
-	
-	
-	Purpose = CurTable.Get(TableID.Purpose);
-	
-	
-	Return Purpose = "Main" Or Purpose = "Основная";
-	
-EndFunction
-
-Function IsChangesTable(Val CurTable)
-	
-	Var Purpose;
-	
-	
-	Purpose = CurTable.Get(TableID.Purpose);
-	
-	
-	Return Purpose = "ChangeRecords" Or Purpose = "РегистрацияИзменений";
-	
-EndFunction
-
 Function GetRowByTableName(Val TableName)
 	
 	Var Names;
@@ -382,22 +365,33 @@ Function GetSubRowByTableName(Val Rows, Val Names, Val NameIndex = 1)
 	
 EndFunction
 
+Procedure SetupColumnNames()
+	
+	If Not ColumnNames = Undefined Then 
+		Return;
+	EndIf;
+	
+	ColumnNames = New Structure;
+	ColumnNames.Insert("_ConstID", NStr("en = 'ConstantID'; ru = 'ИДКонстанты'"));
+	ColumnNames.Insert("_KeyField", NStr("en = 'UniqueKeyField'; ru = 'УникальныйИдентификаторСтроки'"));
+	ColumnNames.Insert("_MessageNo", NStr("en = 'MessageNumber'; ru = 'НомерСообщения'"));
+	ColumnNames.Insert("_NodeRRef", NStr("en = 'Node'; ru = 'Узел'"));
+	ColumnNames.Insert("_NodeTRef", NStr("en = 'Node'; ru = 'Узел'"));
+	ColumnNames.Insert("_NumberPrefix", NStr("en = 'NumberPrefix'; ru = 'ПрефиксНомера'"));
+	ColumnNames.Insert("_RecordKey", NStr("en = 'RecordKey'; ru = 'КлючЗаписи'"));
+	ColumnNames.Insert("_SimpleKey", NStr("en = 'SimpleKey'; ru = 'КороткийКлючЗаписи'"));
+	
+EndProcedure
+
 Function GetColumnName(Name, Storage)
 	
-	Var curNamem, curSufName;
+	Var curName, curSufName;
 	
 	
 	If IsBlankString(Name) Then
 		
-		If Storage = "_KeyField" Then
-			curName = NStr("en = 'UniqueKeyField'; ru = 'УникальнйИдентификаторСтроки'");
-			
-		ElsIf Storage = "_NumberPrefix" Then
-			curName = NStr("en = 'NumberPrefix'; ru = 'ПрефиксНомера'");
-			
-		ElsIf Storage = "_SimpleKey" Then
-			curName = NStr("en = 'SimpleKey'; ru = 'КороткийКлючЗаписи'");
-			
+		If Not ColumnNames.Property(Storage, curName) Then
+			curName = Storage;
 		EndIf;
 		
 	Else
@@ -452,6 +446,59 @@ Function AddTableRow(Val Rows, Val SubName)
 	
 	
 	Return SubRow;
+	
+EndFunction
+
+
+Procedure SetupTablePurposes()
+	
+	If Not TablePurposes = Undefined Then
+		Return;
+	EndIf;
+	
+	TablePurposes = New Structure;
+	TablePurposes.Insert(NStr("en = 'Main'; ru = 'Основная'"), SetTablePurpose(True, False));
+	TablePurposes.Insert(NStr("en = 'Constant'; ru = 'Константа'"), SetTablePurpose(True, False));
+	TablePurposes.Insert(NStr("en = 'ConstantChangeRecords'; ru = 'РегистрацияИзмененийКонстанты'"), SetTablePurpose(False, True));
+	TablePurposes.Insert(NStr("en = 'ChangeRecords'; ru = 'РегистрацияИзменений'"), SetTablePurpose(False, True));
+	
+EndProcedure
+
+Function SetTablePurpose(Val Main, Val Changes)
+	
+	Var purpose;
+	
+	
+	purpose = New Structure;
+	purpose.Insert("IsMainTable", Main);
+	purpose.Insert("IsChangesTable", Changes);
+	
+	
+	Return purpose;
+	
+EndFunction
+
+Function IsMainTable(Val CurTable)
+	
+	Var Purpose, Value;
+	
+	
+	Purpose = CurTable.Get(TableID.Purpose);
+	
+	Return TablePurposes.Property(Purpose, Value)
+		And Value.IsMainTable;
+	
+EndFunction
+
+Function IsChangesTable(Val CurTable)
+	
+	Var Purpose, Value;
+	
+	
+	Purpose = CurTable.Get(TableID.Purpose);
+	
+	Return TablePurposes.Property(Purpose, Value)
+		And Value.IsChangesTable;
 	
 EndFunction
 
