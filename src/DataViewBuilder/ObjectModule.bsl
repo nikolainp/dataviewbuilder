@@ -282,7 +282,8 @@ EndFunction
 
 Procedure LoadTableStorageStructure(Val CurTable)
 	
-	Var TableRow, CurField, FieldRow;
+	Var TableRow, TablePurpose;
+	Var CurField, FieldRow;
 	
 	
 	If IsBlankString(CurTable.Get(TableID.MetaData)) Then
@@ -290,12 +291,16 @@ Procedure LoadTableStorageStructure(Val CurTable)
 	EndIf;
 	
 	TableRow = GetRowByTableName(GetTableName(CurTable));
-	If IsMainTable(CurTable) Then
-		TableRow.IsObject = True;
+	TablePurpose = GetTablePurpose(CurTable);
+	If TablePurpose.IsObjectTable Then
 		TableRow = AddTableRow(TableRow.Rows, CurTable.Get(TableID.Purpose));
-	ElsIf IsChangesTable(CurTable) Then
-		TableRow.IsChangesTable = True;
 	Endif;
+	
+	FillPropertyValues(TableRow, TablePurpose);
+	
+	If TablePurpose.IsMainTable Then
+		TableRow.Parent.IsObject = True;
+	EndIf;
 	
 	TableRow.IsTable = True;
 	TableRow.Storage = CurTable.Get(TableID.StorageTableName);
@@ -372,14 +377,31 @@ Procedure SetupColumnNames()
 	EndIf;
 	
 	ColumnNames = New Structure;
+	ColumnNames.Insert("_ActivationCondition", NStr("en = 'ActivationCondition'; ru = 'Расписание'"));
 	ColumnNames.Insert("_ConstID", NStr("en = 'ConstantID'; ru = 'ИДКонстанты'"));
+	ColumnNames.Insert("_Description", NStr("en = 'Description'; ru = 'Описание'"));
+	ColumnNames.Insert("_FinishTime", NStr("en = 'FinishTime'; ru = 'ВремяПоследнегоЗавершения'"));
+	ColumnNames.Insert("_ID", NStr("en = 'JobID'; ru = 'ИДЗадания'"));
+	ColumnNames.Insert("_JobKey", NStr("en = 'JobKey'; ru = 'КлючЗадания'"));
 	ColumnNames.Insert("_KeyField", NStr("en = 'UniqueKeyField'; ru = 'УникальныйИдентификаторСтроки'"));
 	ColumnNames.Insert("_MessageNo", NStr("en = 'MessageNumber'; ru = 'НомерСообщения'"));
+	ColumnNames.Insert("_MetadataID", NStr("en = 'MetadataID'; ru = 'ИДМетаданных'"));
 	ColumnNames.Insert("_NodeRRef", NStr("en = 'Node'; ru = 'Узел'"));
 	ColumnNames.Insert("_NodeTRef", NStr("en = 'Node'; ru = 'Узел'"));
 	ColumnNames.Insert("_NumberPrefix", NStr("en = 'NumberPrefix'; ru = 'ПрефиксНомера'"));
+	ColumnNames.Insert("_Parameters", NStr("en = 'Parameters'; ru = 'Параметры'"));
+	ColumnNames.Insert("_Predefined", NStr("en = 'Predifined'; ru = 'Предопределенное'"));
+	ColumnNames.Insert("_PredefinedID", NStr("en = 'PredifinedRef'; ru = 'ПредопределеннаяСсылка'"));
 	ColumnNames.Insert("_RecordKey", NStr("en = 'RecordKey'; ru = 'КлючЗаписи'"));
+	ColumnNames.Insert("_RestartAttemptNumber", NStr("en = 'RestartAttemptNumber'; ru = 'ТекущаяПопыткаПерезапуска'"));
+	ColumnNames.Insert("_RestartCount", NStr("en = 'RestartCount'; ru = 'КоличествоПопытокПерезапуска'"));
+	ColumnNames.Insert("_RestartPeriod", NStr("en = 'RestartPeriod'; ru = 'ЗадержкаПерезапуска'"));
 	ColumnNames.Insert("_SimpleKey", NStr("en = 'SimpleKey'; ru = 'КороткийКлючЗаписи'"));
+	ColumnNames.Insert("_StartTime", NStr("en = 'StartTime'; ru = 'ВремяПоследнегоЗапуск'"));
+	ColumnNames.Insert("_State", NStr("en = 'State'; ru = 'ВыполняетсяСейчас'"));
+	ColumnNames.Insert("_Use", NStr("en = 'Use'; ru = 'Включено'"));
+	ColumnNames.Insert("_UserName", NStr("en = 'UserName'; ru = 'ИмяПользователя'"));
+	ColumnNames.Insert("_Version", NStr("en = 'Version'; ru = 'Версия'"));
 	
 EndProcedure
 
@@ -457,19 +479,21 @@ Procedure SetupTablePurposes()
 	EndIf;
 	
 	TablePurposes = New Structure;
-	TablePurposes.Insert(NStr("en = 'Main'; ru = 'Основная'"), SetTablePurpose(True, False));
-	TablePurposes.Insert(NStr("en = 'Constant'; ru = 'Константа'"), SetTablePurpose(True, False));
-	TablePurposes.Insert(NStr("en = 'ConstantChangeRecords'; ru = 'РегистрацияИзмененийКонстанты'"), SetTablePurpose(False, True));
-	TablePurposes.Insert(NStr("en = 'ChangeRecords'; ru = 'РегистрацияИзменений'"), SetTablePurpose(False, True));
+	TablePurposes.Insert(NStr("en = 'ChangeRecords'; ru = 'РегистрацияИзменений'"), SetTablePurpose(False, False, True));
+	TablePurposes.Insert(NStr("en = 'Constant'; ru = 'Константа'"), SetTablePurpose(True, True, False));
+	TablePurposes.Insert(NStr("en = 'ConstantChangeRecords'; ru = 'РегистрацияИзмененийКонстанты'"), SetTablePurpose(False, False, True));
+	TablePurposes.Insert(NStr("en = 'Main'; ru = 'Основная'"), SetTablePurpose(True, True, False));
+	TablePurposes.Insert(NStr("en = 'ScheduledJobs'; ru = 'РегламентныеЗадания'"), SetTablePurpose(False, True, False));
 	
 EndProcedure
 
-Function SetTablePurpose(Val Main, Val Changes)
+Function SetTablePurpose(Val Object, Val Main, Val Changes)
 	
 	Var purpose;
 	
 	
 	purpose = New Structure;
+	purpose.Insert("IsObjectTable", Object);
 	purpose.Insert("IsMainTable", Main);
 	purpose.Insert("IsChangesTable", Changes);
 	
@@ -478,30 +502,18 @@ Function SetTablePurpose(Val Main, Val Changes)
 	
 EndFunction
 
-Function IsMainTable(Val CurTable)
+Function GetTablePurpose(Val CurTable)
 	
 	Var Purpose, Value;
 	
 	
 	Purpose = CurTable.Get(TableID.Purpose);
-	
-	Return TablePurposes.Property(Purpose, Value)
-		And Value.IsMainTable;
-	
-EndFunction
-
-Function IsChangesTable(Val CurTable)
-	
-	Var Purpose, Value;
+	TablePurposes.Property(Purpose, Value);
 	
 	
-	Purpose = CurTable.Get(TableID.Purpose);
-	
-	Return TablePurposes.Property(Purpose, Value)
-		And Value.IsChangesTable;
+	Return ?(Value = Undefined, SetTablePurpose(False, False, False), Value);
 	
 EndFunction
-
 
 Procedure SortLevelStorageStructure(Rows)
 	
