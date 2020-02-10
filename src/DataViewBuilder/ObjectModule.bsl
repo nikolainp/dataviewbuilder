@@ -119,6 +119,26 @@ Function lStrFind(Val String, Val SearchString) Export
 	
 EndFunction
 
+Function lStrFindFromEnd(Val String, Val SearchString) Export
+	
+	Var lString, StringCount, LastString;
+	Var LastPosition;
+	
+	
+	lString = StrReplace(String, SearchString, Chars.LF);
+	StringCount = StrLineCount(lString);
+	If StringCount = 1 Then 
+		Return 0;
+	EndIf;
+	
+	LastString = StrGetLine(lString, StringCount);
+	LastPosition = StrLen(LastString) + StrLen(SearchString);
+	
+	
+	Return LastPosition;
+	
+EndFunction
+
 Function lStrTemplate(Val Template
 	, Val Val1 = ""
 	, Val Val2 = ""
@@ -130,7 +150,6 @@ Function lStrTemplate(Val Template
 	, Val Val8 = ""
 	, Val Val9 = "") Export
 	
-	Var I;
 	Var lTemplate;
 	
 	
@@ -588,16 +607,20 @@ EndFunction
 
 Function GetSQLNameForTable(Val curTable)
 	
-	Var tableName;
+	Var TableName;
 	
+	TableName = curTable.FullName;
+	If curTable.IsMainTable Then
+		TableName = Left(TableName, StrLen(TableName) - lStrFindFromEnd(TableName, "."));
+	EndIf;
+	TableName = StrReplace(TableName, ".", "_");
 	
-	tableName = StrReplace(curTable.FullName, ".", "_");
 	If ThisObject.DataView_AddDBName Then
-		tableName = lStrTemplate("%1_%2", ThisObject.SourceDB, tableName);
+		TableName = lStrTemplate("%1_%2", ThisObject.SourceDB, TableName);
 	EndIf;
 	
 	
-	Return tableName;
+	Return TableName;
 	
 EndFunction
 
