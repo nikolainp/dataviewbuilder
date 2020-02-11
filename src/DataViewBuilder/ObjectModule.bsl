@@ -238,6 +238,7 @@ Procedure ClearAndCheckStorageStructure()
 	ExpectedColumns.Add(New Structure("Name, Type", "IsObject", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsTable", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsChangesTable", New TypeDescription("Boolean")));
+	ExpectedColumns.Add(New Structure("Name, Type", "IsPredefinedTable", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "IsField", New TypeDescription("Boolean")));
 	ExpectedColumns.Add(New Structure("Name, Type", "Name", New TypeDescription("String")));
 	ExpectedColumns.Add(New Structure("Name, Type", "Storage", New TypeDescription("String")));
@@ -504,20 +505,31 @@ Procedure SetupTablePurposes()
 	TablePurposes.Insert(NStr("en = 'Main'; ru = 'Основная'"), SetTablePurpose(True, True, False));
 	TablePurposes.Insert(NStr("en = 'ScheduledJobs'; ru = 'РегламентныеЗадания'"), SetTablePurpose(False, True, False));
 	
+	TablePurposes.Insert(NStr("en = 'InitializedPredefinedDataInChartOfCharacteristicTypes';
+		| ru = 'ИнициализированныеПредопределенныеДанныеПланаВидовХарактеристик'"), SetTablePurpose( , , , True));
+	TablePurposes.Insert(NStr("en = 'InitializedPredefinedDataInChartOfAccounts';
+		| ru = 'ИнициализированныеПредопределенныеДанныеПланаСчетов'"), SetTablePurpose( , , , True));
+	TablePurposes.Insert(NStr("en = 'InitializedPredefinedDataInChartOfCalculationTypes';
+		| ru = 'ИнициализированныеПредопределенныеДанныеПланаВидовРасчета'"), SetTablePurpose( , , , True));
+	TablePurposes.Insert(NStr("en = 'InitializedPredefinedDataInCatalog';
+		| ru = 'ИнициализированныеПредопределенныеДанныеСправочника'"), SetTablePurpose( , , , True));
+	
 EndProcedure
 
-Function SetTablePurpose(Val Object, Val Main, Val Changes)
+Function SetTablePurpose(Val Object = False, Val Main = False
+	, Val Changes = False, Val Predifined = False)
 	
-	Var purpose;
-	
-	
-	purpose = New Structure;
-	purpose.Insert("IsObjectTable", Object);
-	purpose.Insert("IsMainTable", Main);
-	purpose.Insert("IsChangesTable", Changes);
+	Var Purpose;
 	
 	
-	Return purpose;
+	Purpose = New Structure;
+	Purpose.Insert("IsObjectTable", Object);
+	Purpose.Insert("IsMainTable", Main);
+	Purpose.Insert("IsChangesTable", Changes);
+	Purpose.Insert("IsPredefinedTable", Predifined);
+	
+	
+	Return Purpose;
 	
 EndFunction
 
