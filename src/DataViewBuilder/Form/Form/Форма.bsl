@@ -1,6 +1,13 @@
 ﻿
 #Region FormEventHandlers
-// Enter code here.
+
+&AtClient
+Procedure OnOpen(Cancel)
+	
+	AttachActionsAfterOpening();
+	
+EndProcedure
+
 #EndRegion
 
 #Region FormHeaderItemsEventHandlers
@@ -60,7 +67,56 @@ EndProcedure
 #Region FormCommandsEventHandlers
 
 &AtClient
-Procedure LoadDBStorageStructure(Command)
+Procedure AttachActionsAfterOpening()
+	
+	AttachIdleHandler("AttachActionsAfterOpeningContinue", 0.1, True);
+	
+EndProcedure
+&AtClient
+Procedure AttachActionsAfterOpeningContinue() Export
+	
+	AskForLoadDBStorageStructure();
+	
+EndProcedure
+
+&AtClient
+Procedure AskForLoadDBStorageStructure()
+	
+	Var Notification;
+	
+	
+	Notification = New NotifyDescription("AskForLoadDBStorageStructureContinue", ThisForm);
+	ShowQueryBox(Notification
+		, NStr("en = 'Before you begin, you need to get the database storage structure."
+			+ " This operation may take a long time."
+			+ " During this the interface will not respond to your actions."
+			+ " Start execution?';"
+			+ " ru = 'Перед началом работы необходимо получить структуру хранения базы данных."
+			+ " Эта операция может занять продолжительно время."
+			+ " При этом интерфейс не будет отвечать на ваши действия"
+			+ " Начать выполнение?'")
+		, QuestionDialogMode.YesNo
+		, 30
+		, DialogReturnCode.Yes
+		, NStr("en = 'Attention'; ru = 'Внимание'")
+		, DialogReturnCode.Yes);
+	
+EndProcedure
+&AtClient
+Procedure AskForLoadDBStorageStructureContinue(Val QuestionResult, Val AdditionalParameters) Export
+	
+	If Not QuestionResult = DialogReturnCode.Yes
+		And Not QuestionResult = DialogReturnCode.Timeout Then
+		Return;
+	EndIf;
+	
+	
+	LoadDBStorageStructure();
+	
+EndProcedure
+
+&AtClient
+Procedure LoadDBStorageStructure(Command = Undefined)
 	
 	LoadDBStorageStructureAtServer();
 	
