@@ -149,8 +149,7 @@ Procedure SetFlagOnSubTree(Val parentTree, Val parentFlag)
 	
 	For Each curRow In parentTree.GetItems() Do
 		
-		If Object.DataView_SkipChanges
-			and curRow.IsChangesTable Then
+		If SkipFlagOnLevel(curRow) Then
 			Continue;
 		EndIf;
 		
@@ -169,8 +168,7 @@ Function GetFlagOnLevel(Val level)
 	
 	For Each curRow In level.GetItems() Do
 		
-		If Object.DataView_SkipChanges
-			and curRow.IsChangesTable Then
+		If SkipFlagOnLevel(curRow) Then
 			Continue;
 		EndIf;
 		
@@ -186,6 +184,14 @@ Function GetFlagOnLevel(Val level)
 	
 	
 	Return flagOnLevel;
+	
+EndFunction
+
+&AtClient
+Function SkipFlagOnLevel(Val curRow)
+	
+	Return (Object.DataView_SkipChanges And curRow.IsChangesTable)
+		Or (Object.DataView_SkipPredefined And curRow.IsPredefinedTable);
 	
 EndFunction
 

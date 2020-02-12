@@ -1,5 +1,5 @@
 ﻿{4,
-{8,
+{9,
 {04d190f7-6849-43ab-b39c-86d2c2188b4b,04d190f7-6849-43ab-b39c-86d2c2188b4b,1,
 {c3831ec8-d8d5-4f93-8a22-f9bfae07327f,"DataViewBuilder"}
 },
@@ -18,6 +18,9 @@
 {abddbd54-a7f5-4380-a630-a952383a3867,abddbd54-a7f5-4380-a630-a952383a3867,1,
 {ec6bb5e5-b7a8-4d75-bec9-658107a699cf,"DataView_SkipChanges"}
 },
+{d99e802d-5c3d-4cd7-a14c-9acb7caf5bc7,d99e802d-5c3d-4cd7-a14c-9acb7caf5bc7,1,
+{ec6bb5e5-b7a8-4d75-bec9-658107a699cf,"DataView_SkipPredefined"}
+},
 {ff1f99f8-3cd0-45e6-af40-fef9f6386b04,ff1f99f8-3cd0-45e6-af40-fef9f6386b04,1,
 {ec6bb5e5-b7a8-4d75-bec9-658107a699cf,"MetaStructure"}
 },
@@ -28,7 +31,7 @@
 {1,
 {cd809926-b666-404c-8389-5685b6e0c3ff,04d190f7-6849-43ab-b39c-86d2c2188b4b,0}
 },
-{16,
+{17,
 {
 {0,2ab6c203-7221-44fb-8dec-9578c58c2c90},cd809926-b666-404c-8389-5685b6e0c3ff,
 {-1}
@@ -43,6 +46,10 @@
 },
 {
 {0,abddbd54-a7f5-4380-a630-a952383a3867},cd809926-b666-404c-8389-5685b6e0c3ff,
+{-1}
+},
+{
+{0,d99e802d-5c3d-4cd7-a14c-9acb7caf5bc7},cd809926-b666-404c-8389-5685b6e0c3ff,
 {-1}
 },
 {
