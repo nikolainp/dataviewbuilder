@@ -78,6 +78,19 @@ Function CreateDataView(Val Table) Export
 	
 EndFunction
 
+Function DropAllDataView() Export
+	
+	Var curQuery;
+	
+	
+	For Each curQuery in GetSQLCodeForDropAllDataViews() Do
+		
+		WriteData(curQuery);
+		
+	EndDo;
+	
+EndFunction
+
 Function DataViewName(Val Table) Export
 	
 	Return GetSQLNameForTable(Table);
@@ -197,7 +210,38 @@ Function lStrEndsWith(Val String, Val SearchString) Export
 	
 EndFunction
 
-#EndRegion 
+#EndRegion
+
+Function lToArray(Array = Undefined
+	, Val Val1 = Undefined
+	, Val Val2 = Undefined
+	, Val Val3 = Undefined
+	, Val Val4 = Undefined
+	, Val Val5 = Undefined
+	, Val Val6 = Undefined
+	, Val Val7 = Undefined
+	, Val Val8 = Undefined
+	, Val Val9 = Undefined) Export
+	
+	
+	If Not TypeOf(Array) = Type("Array") Then
+		Array = New Array;
+	EndIf;
+	
+	If Not Val1 = Undefined Then Array.Add(Val1) EndIf;
+	If Not Val2 = Undefined Then Array.Add(Val2) EndIf;
+	If Not Val3 = Undefined Then Array.Add(Val3) EndIf;
+	If Not Val4 = Undefined Then Array.Add(Val4) EndIf;
+	If Not Val5 = Undefined Then Array.Add(Val5) EndIf;
+	If Not Val6 = Undefined Then Array.Add(Val6) EndIf;
+	If Not Val7 = Undefined Then Array.Add(Val7) EndIf;
+	If Not Val8 = Undefined Then Array.Add(Val8) EndIf;
+	If Not Val9 = Undefined Then Array.Add(Val9) EndIf;
+	
+	
+	Return Array;
+	
+EndFunction
 
 #EndRegion
 
@@ -643,6 +687,43 @@ Function WithNoLock()
 EndFunction
 
 #EndRegion
+
+#Region MaintenanceSQL
+
+Function GetSQLCodeForDropAllDataViews()
+	
+	Var Views;
+	Var Queries;
+	
+	
+	Views = ReadData(
+		"SELECT
+		|	v.name
+		|FROM
+		|	sys.views v
+		|	INNER JOIN sys.sql_modules m 
+		|	ON m.object_id = v.object_id
+		|WHERE
+		|	m.definition LIKE ? ESCAPE '\'"
+		, lToArray(, lStrTemplate("%FROM \[%1\]%", ThisObject.SourceDB)));
+		
+	Queries = New Array;
+	While Views.EOF() = 0 do
+		
+		Queries.Add(lStrTemplate(
+			"DROP VIEW [dbo].[%1]"
+			, Views.Fields("Name").Value));
+		
+		Views.MoveNext();
+	EndDo;
+	Views.Close();
+	
+	
+	Return Queries;
+	
+EndFunction
+
+#EndRegion 
 
 #Region SQLWork
 

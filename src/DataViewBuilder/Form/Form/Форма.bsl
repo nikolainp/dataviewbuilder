@@ -67,6 +67,97 @@ EndProcedure
 #Region FormCommandsEventHandlers
 
 &AtClient
+Procedure CreateAll(Command)
+	
+	ClearMessages();
+	CreateAllAtServer();
+	
+	ShowQueryBox(New NotifyDescription("CreateAllContunie", ThisForm)
+		, NStr("en = 'Creation completed'; ru = 'Создание завершено'")
+		, QuestionDialogMode.OK
+		, 10);
+	
+EndProcedure
+&AtClient
+Procedure CreateAllContunie(Result, AdditionalParameters) Export
+	
+EndProcedure
+
+&AtClient
+Procedure LoadDBStorageStructure(Command = Undefined)
+	
+	LoadDBStorageStructureAtServer();
+	
+	Items.FormCreateAll.Enabled = True;
+	
+EndProcedure
+
+&AtClient
+Procedure DropAll(Command)
+	
+	ShowQueryBox(New NotifyDescription("DropAllContunie", ThisForm)
+		, NStr("en = 'All views will be drop. Continue?';
+			| ru = 'Все представления данных будут удалены. Продолжит?'")
+		, QuestionDialogMode.OKCancel
+		, 10
+		, DialogReturnCode.Cancel
+		, NStr("en = 'Attention'; ru = 'Внимание'")
+		, DialogReturnCode.Cancel);
+	
+EndProcedure
+&AtClient
+Procedure DropAllContunie(Result, AdditionalParameters) Export
+	
+	If Not Result = DialogReturnCode.OK Then
+		Return;
+	EndIf;
+	
+	
+	DropAllAtServer();
+	
+EndProcedure
+
+&AtClient
+Procedure Options(Command)
+	
+	Var Params, NotifyOfClose;
+	
+	
+	Params = New Structure;
+	Params.Insert("Source", Object);
+	
+	NotifyOfClose = New NotifyDescription("OptionsAtClose"
+		, ThisForm);
+	
+	OpenForm("ExternalDataProcessor.DataViewBuilder.Form.Options"
+		, Params
+		, ThisForm
+		, ThisForm.UniqueKey
+		, 
+		, 
+		, NotifyOfClose
+		, FormWindowOpeningMode.LockOwnerWindow);
+	
+EndProcedure
+&AtClient
+Procedure OptionsAtClose(Result, Params) Export
+	
+	If Result = Undefined Then
+		Return;
+	EndIf;
+	
+	FillPropertyValues(Object, Result);
+	
+EndProcedure
+
+#EndRegion
+
+#Region Private
+
+/////////////////////////////////////////////
+// At Client
+
+&AtClient
 Procedure AttachActionsAfterOpening()
 	
 	AttachIdleHandler("AttachActionsAfterOpeningContinue", 0.1, True);
@@ -114,72 +205,6 @@ Procedure AskForLoadDBStorageStructureContinue(Val QuestionResult, Val Additiona
 	LoadDBStorageStructure();
 	
 EndProcedure
-
-&AtClient
-Procedure LoadDBStorageStructure(Command = Undefined)
-	
-	LoadDBStorageStructureAtServer();
-	
-	Items.FormCreateAll.Enabled = True;
-	
-EndProcedure
-
-&AtClient
-Procedure CreateAll(Command)
-	
-	ClearMessages();
-	CreateAllAtServer();
-	
-	ShowQueryBox(New NotifyDescription("CreateAllContunie", ThisForm)
-		, NStr("en = 'Creation completed'; ru = 'Создание завершено'")
-		, QuestionDialogMode.OK
-		, 10);
-	
-EndProcedure
-&AtClient
-Procedure CreateAllContunie(Result, AdditionalParameters) Export
-	
-EndProcedure
-
-&AtClient
-Procedure Options(Command)
-	
-	Var Params, NotifyOfClose;
-	
-	
-	Params = New Structure;
-	Params.Insert("Source", Object);
-	
-	NotifyOfClose = New NotifyDescription("OptionsAtClose"
-		, ThisForm);
-	
-	OpenForm("ExternalDataProcessor.DataViewBuilder.Form.Options"
-		, Params
-		, ThisForm
-		, ThisForm.UniqueKey
-		, 
-		, 
-		, NotifyOfClose
-		, FormWindowOpeningMode.LockOwnerWindow);
-	
-EndProcedure
-&AtClient
-Procedure OptionsAtClose(Result, Params) Export
-	
-	If Result = Undefined Then
-		Return;
-	EndIf;
-	
-	FillPropertyValues(Object, Result);
-	
-EndProcedure
-
-#EndRegion
-
-#Region Private
-
-/////////////////////////////////////////////
-// At Client
 
 &AtClient
 Procedure SetFlagOnUpTree(Val childRow, Val childFlag)
@@ -280,6 +305,13 @@ EndProcedure
 Procedure CreateAllAtServer()
 	
 	IterateOverTables(Object(), Object.MetaStructure.GetItems());
+	
+EndProcedure
+
+&AtServer
+Procedure DropAllAtServer()
+	
+	Object().DropAllDataView();
 	
 EndProcedure
 
